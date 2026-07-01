@@ -8,119 +8,129 @@ import java.nio.charset.StandardCharsets;
 
 public class RespOutputWriter {
 
-    private final BufferedOutputStream output;
+        private final BufferedOutputStream output;
 
-    public RespOutputWriter(
-            BufferedOutputStream output
-    ) {
-        this.output = output;
-    }
+        public RespOutputWriter(
+                        BufferedOutputStream output) {
 
-    public void write(
-            RespResponse response
-    ) throws IOException {
-
-        switch (response) {
-
-            case SimpleStringResponse simple ->
-
-                    writeSimpleString(
-                            simple.value()
-                    );
-
-            case BulkStringResponse bulk ->
-
-                    writeBulkString(
-                            bulk.value()
-                    );
-
-            case IntegerResponse integer ->
-
-                    writeInteger(
-                            integer.value()
-                    );
-
-            case ErrorResponse error ->
-
-                    writeError(
-                            error.message()
-                    );
-
-            case NullBulkStringResponse ignored ->
-
-                    writeNullBulkString();
+                this.output = output;
 
         }
 
-        output.flush();
+        public void write(
+                        RespResponse response) throws IOException {
 
-    }
+                writeInternal(response);
 
-    private void writeSimpleString(
-            String value
-    ) throws IOException {
+                output.flush();
 
-        output.write(
-                ("+" + value + "\r\n")
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+        }
 
-    }
+        private void writeInternal(
+                        RespResponse response) throws IOException {
 
-    private void writeError(
-            String error
-    ) throws IOException {
+                switch (response) {
 
-        output.write(
-                ("-" + error + "\r\n")
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+                        case SimpleStringResponse simple ->
 
-    }
+                                writeSimpleString(
+                                                simple.value());
 
-    private void writeInteger(
-            long value
-    ) throws IOException {
+                        case BulkStringResponse bulk ->
 
-        output.write(
-                (":" + value + "\r\n")
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+                                writeBulkString(
+                                                bulk.value());
 
-    }
+                        case IntegerResponse integer ->
 
-    private void writeBulkString(
-            String value
-    ) throws IOException {
+                                writeInteger(
+                                                integer.value());
 
-        byte[] bytes =
-                value.getBytes(
-                        StandardCharsets.UTF_8
-                );
+                        case ErrorResponse error ->
 
-        output.write(
-                ("$" + bytes.length + "\r\n")
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+                                writeError(
+                                                error.message());
 
-        output.write(bytes);
+                        case NullBulkStringResponse ignored ->
 
-        output.write(
-                "\r\n".getBytes(
-                        StandardCharsets.UTF_8
-                )
-        );
+                                writeNullBulkString();
 
-    }
+                        case ArrayResponse array ->
 
-    private void writeNullBulkString()
-            throws IOException {
+                                writeArray(
+                                                array);
 
-        output.write(
-                "$-1\r\n"
-                        .getBytes(StandardCharsets.UTF_8)
-        );
+                }
 
-    }
+        }
+
+        private void writeSimpleString(
+                        String value) throws IOException {
+
+                output.write(
+                                ("+" + value + "\r\n")
+                                                .getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        private void writeError(
+                        String error) throws IOException {
+
+                output.write(
+                                ("-" + error + "\r\n")
+                                                .getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        private void writeInteger(
+                        long value) throws IOException {
+
+                output.write(
+                                (":" + value + "\r\n")
+                                                .getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        private void writeBulkString(
+                        String value) throws IOException {
+
+                byte[] bytes = value.getBytes(
+                                StandardCharsets.UTF_8);
+
+                output.write(
+                                ("$" + bytes.length + "\r\n")
+                                                .getBytes(StandardCharsets.UTF_8));
+
+                output.write(bytes);
+
+                output.write(
+                                "\r\n"
+                                                .getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        private void writeNullBulkString()
+                        throws IOException {
+
+                output.write(
+                                "$-1\r\n"
+                                                .getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        private void writeArray(
+                        ArrayResponse array) throws IOException {
+
+                output.write(
+                                ("*" + array.values().size() + "\r\n")
+                                                .getBytes(StandardCharsets.UTF_8));
+
+                for (RespResponse response : array.values()) {
+
+                        writeInternal(response);
+
+                }
+
+        }
 
 }

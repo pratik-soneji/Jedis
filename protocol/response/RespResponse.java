@@ -5,7 +5,8 @@ public sealed interface RespResponse
                 BulkStringResponse,
                 IntegerResponse,
                 ErrorResponse,
-                NullBulkStringResponse {
+                NullBulkStringResponse,
+                 ArrayResponse {
 }
 
 // Why sealed?

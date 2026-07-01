@@ -1,7 +1,6 @@
 package command.impl;
 
 import command.Command;
-import command.Commands;
 import protocol.Resp;
 import protocol.response.RespResponse;
 import storage.MiniRedis;
@@ -15,24 +14,22 @@ public class GetCommand implements RedisCommand {
     }
 
     @Override
-    public Commands getType() {
-        return Commands.GET;
+    public String name() {
+        return "GET";
     }
 
     @Override
     public RespResponse execute(Command command) {
 
         if (command.arguments().size() != 1) {
-            return Resp.error(
-                    "wrong number of arguments for 'GET'"
-            );
+            return Resp.wrongArguments("GET");
         }
 
-        String key = command.arguments().get(0);
-
-        String value = redis.get(key);
-
-        return Resp.bulk(value);
+        return Resp.bulk(
+                redis.get(
+                        command.arguments().getFirst()
+                )
+        );
 
     }
 

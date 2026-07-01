@@ -1,7 +1,6 @@
 package command.impl;
 
 import command.Command;
-import command.Commands;
 import protocol.Resp;
 import protocol.response.RespResponse;
 import storage.MiniRedis;
@@ -15,12 +14,16 @@ public class BgSaveCommand implements RedisCommand {
     }
 
     @Override
-    public Commands getType() {
-        return Commands.BGSAVE;
+    public String name() {
+        return "BGSAVE";
     }
 
     @Override
     public RespResponse execute(Command command) {
+
+        if (!command.arguments().isEmpty()) {
+            return Resp.wrongArguments("BGSAVE");
+        }
 
         redis.bgSave();
 

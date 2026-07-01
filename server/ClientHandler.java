@@ -4,17 +4,15 @@ import command.Command;
 import command.CommandExecutor;
 import protocol.RespInputParser;
 import protocol.RespOutputWriter;
+import protocol.response.RespResponse;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
 
         private final Socket socket;
-
-        private final RespInputParser parser;
 
         private final CommandExecutor executor;
 
@@ -24,7 +22,6 @@ public class ClientHandler implements Runnable {
 
                 this.socket = socket;
                 this.executor = executor;
-                this.parser = new RespInputParser();
 
         }
 
@@ -33,13 +30,17 @@ public class ClientHandler implements Runnable {
 
                 try (
 
+                                socket;
+
                                 BufferedInputStream input = new BufferedInputStream(
                                                 socket.getInputStream());
 
                                 BufferedOutputStream output = new BufferedOutputStream(
-                                                socket.getOutputStream());
+                                                socket.getOutputStream())
 
                 ) {
+
+                        RespInputParser parser = new RespInputParser();
 
                         RespOutputWriter writer = new RespOutputWriter(output);
 
@@ -47,28 +48,23 @@ public class ClientHandler implements Runnable {
 
                                 Command command = parser.parse(input);
 
-                                writer.write(
-                                                executor.execute(command));
+                                if (command == null) {
+                                        break;
+                                }
+
+                                RespResponse response = executor.execute(command);
+
+                                writer.write(response);
+
+                                if (command.name().equalsIgnoreCase("QUIT")) {
+                                        break;
+                                }
 
                         }
 
-                }
+                } catch (Exception e) {
 
-                catch (Exception e) {
                         e.printStackTrace();
-                }
-
-                finally {
-
-                        try {
-
-                                socket.close();
-
-                        }
-
-                        catch (IOException ignored) {
-
-                        }
 
                 }
 

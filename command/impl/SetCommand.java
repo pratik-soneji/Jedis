@@ -1,7 +1,6 @@
 package command.impl;
 
 import command.Command;
-import command.Commands;
 import protocol.Resp;
 import protocol.response.RespResponse;
 import storage.MiniRedis;
@@ -15,25 +14,24 @@ public class SetCommand implements RedisCommand {
     }
 
     @Override
-    public Commands getType() {
-        return Commands.SET;
+    public String name() {
+        return "SET";
     }
 
     @Override
     public RespResponse execute(Command command) {
 
         if (command.arguments().size() != 2) {
-            return Resp.error(
-                    "wrong number of arguments for 'SET'"
-            );
+            return Resp.wrongArguments("SET");
         }
 
-        String key = command.arguments().get(0);
-        String value = command.arguments().get(1);
-
-        redis.set(key, value);
+        redis.set(
+                command.arguments().get(0),
+                command.arguments().get(1)
+        );
 
         return Resp.ok();
+
     }
 
 }

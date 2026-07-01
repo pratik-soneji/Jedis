@@ -1,12 +1,11 @@
 package command.impl;
 
 import command.Command;
-import command.Commands;
 import protocol.response.RespResponse;
 
 public interface RedisCommand {
 
-    Commands getType();
+    String name();
 
     RespResponse execute(Command command);
 

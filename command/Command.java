@@ -4,12 +4,13 @@ import java.util.List;
 
 public record Command(
 
-        Commands type,
+                String name,
 
-        List<String> arguments
+                List<String> arguments
 
-) {}
+) {
 
+}
 
 // MSET
 // name
@@ -18,11 +19,9 @@ public record Command(
 // 21
 // city
 // Rajkot
-// Changed to List<> because a fixed key and value won't scale 
+// Changed to List<> because a fixed key and value won't scale
 
-
-
-// Now its like tthis 
+// Now its like tthis
 // SET → ["name", "Pratik"]
 // GET → ["name"]
 // DEL → ["name"]
